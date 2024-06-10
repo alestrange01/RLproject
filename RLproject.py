@@ -144,11 +144,13 @@ class Agent:
         self.env.reset()
         self.epsilon = 0 #Disabilito l'esplorazione
         cumulative_reward = 0
+        actions = []
         while not self.env.isEnd:
             state = (self.env.UE_position, sum([self.env.BS_state[i] * 2**i for i in range(len(self.env.BS_coverage))]))
             action = self.choose_action(state)
             reward = self.env.step(action)
             cumulative_reward += reward
+            actions.append(action)
             print(f"State: {state}")
             print(f"Action: {action}")
             print(f"Reward: {reward}")
@@ -160,6 +162,7 @@ class Agent:
         print(f"Cumulative Reward: {cumulative_reward}")
         print(f"Covered Time: {self.env.covered_time}")
         print(f"Active Cost: {self.env.active_cost}")
+        print("Actions: ", actions)
 
 if __name__ == "__main__":
     random.seed(0)
