@@ -25,8 +25,7 @@ class Environment:
 
     def gen_UE_path(self):
         # Path dell'UE
-        path = [(0, 0), (0, 1), (1, 1), (1, 2), (2, 2), 
-                (2, 3), (3, 3), (4, 3), (5, 3)]
+        path = [(0, 0), (0, 1), (1, 1), (1, 2), (2, 2), (2, 3), (3, 3), (4, 3), (5, 3)]
         return path
 
     def reset(self):
@@ -45,9 +44,9 @@ class Environment:
         
         #Vado avanti di un time step e aggiorno la posizione dell'UE
         self.time_step += 1
-        if self.time_step < len(self.UE_path):
-            self.UE_position = self.UE_path[self.time_step-1]
-        else:
+        self.UE_position = self.UE_path[self.time_step]
+       
+        if self.UE_position == self.end_position:
             self.isEnd = True
         
         #Calcolo la reward
@@ -68,7 +67,6 @@ class Environment:
             reward = -1.5
 
         #Calcolo il costo attivo
-        active_BS_count = sum(self.BS_state)
         self.active_cost += active_BS_count
 
         return reward
@@ -80,7 +78,7 @@ class Agent:
         self.gamma = 0.99  #Fattore di sconto
         self.epsilon = 1.0  #Tasso di esplorazione iniziale
         self.epsilon_min = 0.025  #Tasso minimo di esplorazione
-        self.epsilon_decay = 0.999  #Decadimento dell'epsilon per favorire sfruttamento
+        self.epsilon_decay = 0.999  #Decadimento dell'epsilon
         self.Q = {}  #Tabella Q
 
     def initialize_Q(self):
@@ -141,7 +139,31 @@ class Agent:
         plt.title('Cumulative Reward per Episode')
         plt.show()
 
+    def eval(self):
+        #Valuto l'agente
+        self.env.reset()
+        self.epsilon = 0 #Disabilito l'esplorazione
+        cumulative_reward = 0
+        while not self.env.isEnd:
+            state = (self.env.UE_position, sum([self.env.BS_state[i] * 2**i for i in range(len(self.env.BS_coverage))]))
+            action = self.choose_action(state)
+            reward = self.env.step(action)
+            cumulative_reward += reward
+            print(f"State: {state}")
+            print(f"Action: {action}")
+            print(f"Reward: {reward}")
+            print("BS State: ", self.env.BS_state)
+            print("Covered Time: ", self.env.covered_time)
+            print("------------")
+
+
+        print(f"Cumulative Reward: {cumulative_reward}")
+        print(f"Covered Time: {self.env.covered_time}")
+        print(f"Active Cost: {self.env.active_cost}")
+
 if __name__ == "__main__":
+    random.seed(0)
     env = Environment()
     agent = Agent(env)
-    agent.train(10000)
+    agent.train(5000)
+    agent.eval()
