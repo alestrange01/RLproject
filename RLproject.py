@@ -57,12 +57,15 @@ class Environment:
     def get_reward(self):
         #Vedo se l'UE è coperto da una sola BS
         covering_BS_count = sum(self.UE_position in self.BS_coverage[i] and self.BS_state[i] == 1 for i in range(len(self.BS_coverage)))
+        active_BS_count = sum(self.BS_state)
         
-        if covering_BS_count == 1:
+        if covering_BS_count == 1 and active_BS_count == 1:
             reward = 1.5
             self.covered_time += 1
+        elif covering_BS_count == 1 and active_BS_count > 1:
+            reward = - 1 * (covering_BS_count)
         else:
-            reward = -1 - 1 * (covering_BS_count)
+            reward = -1.5
 
         #Calcolo il costo attivo
         active_BS_count = sum(self.BS_state)
@@ -141,4 +144,4 @@ class Agent:
 if __name__ == "__main__":
     env = Environment()
     agent = Agent(env)
-    agent.train(30000)
+    agent.train(10000)
