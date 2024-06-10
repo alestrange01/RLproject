@@ -46,7 +46,7 @@ class Environment:
         #Vado avanti di un time step e aggiorno la posizione dell'UE
         self.time_step += 1
         if self.time_step < len(self.UE_path):
-            self.UE_position = self.UE_path[self.time_step]
+            self.UE_position = self.UE_path[self.time_step-1]
         else:
             self.isEnd = True
         
@@ -58,12 +58,12 @@ class Environment:
         #Vedo se l'UE è coperto da una sola BS
         covering_BS_count = sum(self.UE_position in self.BS_coverage[i] and self.BS_state[i] == 1 for i in range(len(self.BS_coverage)))
         active_BS_count = sum(self.BS_state)
-        
-        if covering_BS_count == 1 and active_BS_count == 1:
-            reward = 1.5
+        if covering_BS_count == 1 :
             self.covered_time += 1
-        elif covering_BS_count == 1 and active_BS_count > 1:
-            reward = - 1 * (covering_BS_count)
+            if active_BS_count == 1:
+                reward = 1.5
+            else :
+                reward = - 1 * (covering_BS_count)
         else:
             reward = -1.5
 
