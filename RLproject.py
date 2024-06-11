@@ -24,12 +24,12 @@ class Environment:
         self.active_cost = 0
 
     def gen_UE_path(self):
-        # Path dell'UE
+        #Path dell'UE
         path = [(0, 0), (0, 1), (1, 1), (1, 2), (2, 2), (2, 3), (3, 3), (4, 3), (5, 3)]
         return path
 
     def reset(self):
-        # Reset environment
+        #Reset environment
         self.UE_position = (0, 0)
         self.BS_state = [0, 0, 0, 0]
         self.time_step = 0
@@ -41,14 +41,11 @@ class Environment:
         #Aggiorno lo stato delle BS
         for i, state in enumerate(action):
             self.BS_state[i] = state
-        
         #Vado avanti di un time step e aggiorno la posizione dell'UE
         self.time_step += 1
         self.UE_position = self.UE_path[self.time_step]
-       
         if self.UE_position == self.end_position:
             self.isEnd = True
-        
         #Calcolo la reward
         reward = self.get_reward()
         return reward
@@ -57,29 +54,27 @@ class Environment:
         #Vedo se l'UE è coperto da una sola BS
         covering_BS_count = sum(self.UE_position in self.BS_coverage[i] and self.BS_state[i] == 1 for i in range(len(self.BS_coverage)))
         active_BS_count = sum(self.BS_state)
-        if covering_BS_count == 1 :
+        if covering_BS_count == 1:
             self.covered_time += 1
             if active_BS_count == 1:
-                reward = 1.5
-            else :
-                reward = - 1 * (covering_BS_count)
+                reward = 5
+            else:
+                reward = 1.5 - 2 * (active_BS_count - 1)
         else:
-            reward = -1.5
-
+            reward = -2 * (active_BS_count)
         #Calcolo il costo attivo
         self.active_cost += active_BS_count
-
         return reward
 
 class Agent:
     def __init__(self, env):
         self.env = env
-        self.alpha = 0.1  #Tasso di apprendimento
-        self.gamma = 0.99  #Fattore di sconto
-        self.epsilon = 1.0  #Tasso di esplorazione iniziale
-        self.epsilon_min = 0.025  #Tasso minimo di esplorazione
-        self.epsilon_decay = 0.999  #Decadimento dell'epsilon
-        self.Q = {}  #Tabella Q
+        self.alpha = 0.1 #Tasso di apprendimento
+        self.gamma = 0.99 #Fattore di sconto
+        self.epsilon = 1.0 #Tasso di esplorazione iniziale
+        self.epsilon_min = 0.025 #Tasso minimo di esplorazione
+        self.epsilon_decay = 0.999 #Decadimento dell'epsilon
+        self.Q = {} #Tabella Q
 
     def initialize_Q(self):
         #Inizializzo la tabella Q
@@ -111,19 +106,17 @@ class Agent:
             self.env.reset()
             cumulative_reward = 0
             while not self.env.isEnd:
-                #Finchè non finisce l'episodio scelgo l'azione e aggiorno la tabella Q
+                #Finché non finisce l'episodio scelgo l'azione e aggiorno la tabella Q
                 state = (self.env.UE_position, sum([self.env.BS_state[i] * 2**i for i in range(len(self.env.BS_coverage))]))
                 action = self.choose_action(state)
                 reward = self.env.step(action)
                 next_state = (self.env.UE_position, sum([self.env.BS_state[i] * 2**i for i in range(len(self.env.BS_coverage))]))
                 self.update_Q(state, action, reward, next_state)
                 cumulative_reward += reward
-
             rewards_per_episode.append(cumulative_reward)
             #Ridurre l'epsilon per favorire l'utilizzo della tabella Q
             if self.epsilon > self.epsilon_min:
                 self.epsilon *= self.epsilon_decay
-
             #Stampo i risultati
             print(f"Episode {episode + 1}/{episodes}")
             print(f"Cumulative Reward: {cumulative_reward}")
@@ -131,8 +124,7 @@ class Agent:
             print(f"Active Cost: {self.env.active_cost}")
             print(f"Epsilon: {self.epsilon}")
             print("------------")
-
-        # Plot cumulative reward per episode
+        #Plot cumulative reward per episode
         plt.plot(range(episodes), rewards_per_episode)
         plt.xlabel('Episode')
         plt.ylabel('Cumulative Reward')
@@ -157,8 +149,6 @@ class Agent:
             print("BS State: ", self.env.BS_state)
             print("Covered Time: ", self.env.covered_time)
             print("------------")
-
-
         print(f"Cumulative Reward: {cumulative_reward}")
         print(f"Covered Time: {self.env.covered_time}")
         print(f"Active Cost: {self.env.active_cost}")
