@@ -59,7 +59,7 @@ class Environment:
             if active_BS_count == 1:
                 reward = 5
             else:
-                reward = 1.5 - 2 * (active_BS_count - 1)
+                reward = 1.5 - 2 * (active_BS_count - 1) #Penalizzo il costo attivo
         else:
             reward = -2 * (active_BS_count)
         #Calcolo il costo attivo
