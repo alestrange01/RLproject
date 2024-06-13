@@ -81,8 +81,10 @@ class Agent:
         #Inizializzo la tabella Q
         """for x in range(self.env.grid_size[0]):
             for y in range(self.env.grid_size[1]):
-                for state in range(2**len(self.env.BS_coverage)): #Ogni possibile stato lo inizializzo a 0
-                    self.Q[((x, y), state)] = [0] * 2**len(self.env.BS_coverage)"""
+                for state in range(2**len(self.env.BS_coverage)): 
+                    self.Q[((x, y), state)] = [0] * 2**len(self.env.BS_coverage)""" #Ogni possibile stato lo inizializzo a 0
+        
+        #Versione ottimizzata: inizializzo solo i possibili stati (il percorso dell'UE è fisso)
         for x,y in self.env.UE_path:
             if (x, y) == self.env.end_position:
                 continue
