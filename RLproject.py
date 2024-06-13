@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import matplotlib.pyplot as plt
+import torch
 
 class Environment:
     def __init__(self):
@@ -78,10 +79,18 @@ class Agent:
 
     def initialize_Q(self):
         #Inizializzo la tabella Q
-        for x in range(self.env.grid_size[0]):
+        """for x in range(self.env.grid_size[0]):
             for y in range(self.env.grid_size[1]):
                 for state in range(2**len(self.env.BS_coverage)): #Ogni possibile stato lo inizializzo a 0
-                    self.Q[((x, y), state)] = [0] * 2**len(self.env.BS_coverage)
+                    self.Q[((x, y), state)] = [0] * 2**len(self.env.BS_coverage)"""
+        for x,y in self.env.UE_path:
+            if (x, y) == self.env.end_position:
+                continue
+            if (x, y) == (0, 0):
+                self.Q[((x, y), 0)] = [0] * 2**len(self.env.BS_coverage)
+                continue
+            for state in range(2**len(self.env.BS_coverage)):
+                self.Q[((x, y), state)] = [0] * 2**len(self.env.BS_coverage)
 
     def choose_action(self, state):
         #Scelgo l'azione da fare in base all'epsilon
@@ -93,7 +102,11 @@ class Agent:
 
     def update_Q(self, state, action, reward, next_state):
         #Aggiorno la tabella Q
-        best_next_action = max(self.Q[next_state])
+        pos, _ = next_state
+        if pos == self.env.end_position:
+            best_next_action = 0
+        else:
+            best_next_action = max(self.Q[next_state])
         action_index = sum([action[i] << i for i in range(len(action))])
         self.Q[state][action_index] = self.Q[state][action_index] + self.alpha * (reward + self.gamma * best_next_action - self.Q[state][action_index])
 
@@ -153,6 +166,9 @@ class Agent:
         print(f"Covered Time: {self.env.covered_time}")
         print(f"Active Cost: {self.env.active_cost}")
         print("Actions: ", actions)
+        #print("Q Table: ", self.Q)
+
+        
 
 if __name__ == "__main__":
     random.seed(0)
