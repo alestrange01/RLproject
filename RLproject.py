@@ -110,7 +110,11 @@ class Agent:
 
     def update_Q(self, state, action, reward, next_state):
         #Aggiorno la tabella Q
-        best_next_action = max(self.Q[next_state])
+        pos, _ = next_state
+        if pos == self.env.end_position:
+            best_next_action = 0
+        else:
+            best_next_action = max(self.Q[next_state])
         action_index = sum([action[i] << i for i in range(len(action))])
         self.Q[state][action_index] = self.Q[state][action_index] + self.alpha * (reward + self.gamma * best_next_action - self.Q[state][action_index])
 
