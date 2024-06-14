@@ -92,6 +92,8 @@ class Agent:
         #        continue
         #    for state in range(2**len(self.env.BS_coverage)):
         #        self.Q[(x, y), state] = [0] * 2**len(self.env.BS_coverage)
+
+        #Versione ottimizzata v2: inizializzo la tabella Q solo per le posizioni dell'UE
         for position in self.env.UE_path:
             if position == self.env.end_position:
                 continue
@@ -105,6 +107,8 @@ class Agent:
             #Scelgo l'azione migliore
             #best_action_index = np.argmax(self.Q[state])
             #return [best_action_index >> i & 1 for i in range(len(self.env.BS_coverage))]
+
+            #Scelgo casualmente l'azione migliore nel caso ci siano più azioni migliori
             best_action_indexes = [i for i, action in enumerate(self.Q[state]) if action == max(self.Q[state])]
             return [(random.choice(best_action_indexes)) >> i & 1 for i in range(len(self.env.BS_coverage))]
 
