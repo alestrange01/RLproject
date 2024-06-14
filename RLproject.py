@@ -78,36 +78,39 @@ class Agent:
 
     def initialize_Q(self):
         #Inizializzo la tabella Q
-        """for x in range(self.env.grid_size[0]):
-            for y in range(self.env.grid_size[1]):
-                for state in range(2**len(self.env.BS_coverage)): 
-                    self.Q[((x, y), state)] = [0] * 2**len(self.env.BS_coverage)""" #Ogni possibile stato lo inizializzo a 0
-        
-        #Versione ottimizzata: inizializzo solo i possibili stati (il percorso dell'UE è fisso)
-        for x,y in self.env.UE_path:
-            if (x, y) == self.env.end_position:
+        #for x in range(self.env.grid_size[0]):
+        #    for y in range(self.env.grid_size[1]):
+        #        #for state in range(2**len(self.env.BS_coverage)):
+        #        #    self.Q[(x, y, state)] = [0] * 2**len(self.env.BS_coverage)
+        #        self.Q[(x, y)] = [0] * 2**len(self.env.BS_coverage)
+        #Versione ottimizzata: inizializzo la tabella Q solo per le posizioni dell'UE
+        #for x, y in self.env.UE_path:
+        #    if(x, y) == self.env.end_position:
+        #        continue
+        #    if (x, y) == (0, 0):
+        #        self.Q[(x, y), 0] = [0] * 2**len(self.env.BS_coverage)
+        #        continue
+        #    for state in range(2**len(self.env.BS_coverage)):
+        #        self.Q[(x, y), state] = [0] * 2**len(self.env.BS_coverage)
+        for position in self.env.UE_path:
+            if position == self.env.end_position:
                 continue
-            if (x, y) == (0, 0):
-                self.Q[((x, y), 0)] = [0] * 2**len(self.env.BS_coverage)
-                continue
-            for state in range(2**len(self.env.BS_coverage)):
-                self.Q[((x, y), state)] = [0] * 2**len(self.env.BS_coverage)
+            self.Q[position] = [0] * 2**len(self.env.BS_coverage)
 
     def choose_action(self, state):
         #Scelgo l'azione da fare in base all'epsilon
         if random.random() < self.epsilon:
             return [random.choice([0, 1]) for _ in range(len(self.env.BS_coverage))]
         else:
-            best_action_index = np.argmax(self.Q[state])
-            return [(best_action_index >> i) & 1 for i in range(len(self.env.BS_coverage))]
+            #Scelgo l'azione migliore
+            #best_action_index = np.argmax(self.Q[state])
+            #return [best_action_index >> i & 1 for i in range(len(self.env.BS_coverage))]
+            best_action_indexes = [i for i, action in enumerate(self.Q[state]) if action == max(self.Q[state])]
+            return random.choice(best_action_indexes)
 
     def update_Q(self, state, action, reward, next_state):
         #Aggiorno la tabella Q
-        pos, _ = next_state
-        if pos == self.env.end_position:
-            best_next_action = 0
-        else:
-            best_next_action = max(self.Q[next_state])
+        best_next_action = max(self.Q[next_state])
         action_index = sum([action[i] << i for i in range(len(action))])
         self.Q[state][action_index] = self.Q[state][action_index] + self.alpha * (reward + self.gamma * best_next_action - self.Q[state][action_index])
 
@@ -121,10 +124,10 @@ class Agent:
             cumulative_reward = 0
             while not self.env.isEnd:
                 #Finché non finisce l'episodio scelgo l'azione e aggiorno la tabella Q
-                state = (self.env.UE_position, sum([self.env.BS_state[i] * 2**i for i in range(len(self.env.BS_coverage))]))
+                state = self.env.UE_position
                 action = self.choose_action(state)
                 reward = self.env.step(action)
-                next_state = (self.env.UE_position, sum([self.env.BS_state[i] * 2**i for i in range(len(self.env.BS_coverage))]))
+                next_state = self.env.UE_position
                 self.update_Q(state, action, reward, next_state)
                 cumulative_reward += reward
             rewards_per_episode.append(cumulative_reward)
@@ -152,7 +155,7 @@ class Agent:
         cumulative_reward = 0
         actions = []
         while not self.env.isEnd:
-            state = (self.env.UE_position, sum([self.env.BS_state[i] * 2**i for i in range(len(self.env.BS_coverage))]))
+            state = self.env.UE_position
             action = self.choose_action(state)
             reward = self.env.step(action)
             cumulative_reward += reward
@@ -167,9 +170,6 @@ class Agent:
         print(f"Covered Time: {self.env.covered_time}")
         print(f"Active Cost: {self.env.active_cost}")
         print("Actions: ", actions)
-        #print("Q Table: ", self.Q)
-
-        
 
 if __name__ == "__main__":
     random.seed(0)
