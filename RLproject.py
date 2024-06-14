@@ -106,7 +106,7 @@ class Agent:
             #best_action_index = np.argmax(self.Q[state])
             #return [best_action_index >> i & 1 for i in range(len(self.env.BS_coverage))]
             best_action_indexes = [i for i, action in enumerate(self.Q[state]) if action == max(self.Q[state])]
-            return random.choice(best_action_indexes)
+            return [(random.choice(best_action_indexes)) >> i & 1 for i in range(len(self.env.BS_coverage))]
 
     def update_Q(self, state, action, reward, next_state):
         #Aggiorno la tabella Q
