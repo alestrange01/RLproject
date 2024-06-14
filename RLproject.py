@@ -110,8 +110,7 @@ class Agent:
 
     def update_Q(self, state, action, reward, next_state):
         #Aggiorno la tabella Q
-        pos, _ = next_state
-        if pos == self.env.end_position:
+        if next_state == self.env.end_position:
             best_next_action = 0
         else:
             best_next_action = max(self.Q[next_state])
