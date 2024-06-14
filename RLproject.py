@@ -173,6 +173,7 @@ class Agent:
         print(f"Covered Time: {self.env.covered_time}")
         print(f"Active Cost: {self.env.active_cost}")
         print("Actions: ", actions)
+        #print("Q Table: ", self.Q)
 
 if __name__ == "__main__":
     random.seed(0)
